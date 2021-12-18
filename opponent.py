@@ -2,6 +2,7 @@ from helper import *
 import linecache
 import os.path
 import random
+import sys
 
 """
     This file contains the functions to create an arbitrary opponent with an arbitrary probability transistion function.
@@ -25,17 +26,10 @@ def get_int_list(line):
 
     return line         #return the list [1, 2, 3, 4, 5]
 
-#this is reverse of the above function, given a list of integers[1, 2, 3, 4, 5], convert it into a string
-def getString_from_intlist(l):
-    line = ""
-    for i in range(len(l)):
-        line = line+str(l[i])+' '       #add the integer and then a space
-    line = line+ '\n'                   #add a new line
-    return line                     #return the string("1 2 3 4 5\n")
 
 #This function takes a state and then outputs the probabilites with which the 'O' should be placed in each cell
-def get_probability( boardSize, configuration ):
-    actions = get_listOfActions( boardSize, configuration, 'O' )    #first get the list of all positions in which an 'O' can be placed
+def get_probability( boardSize, configuration, opponentSide ):
+    actions = get_listOfActions( boardSize, configuration, opponentSide )    #first get the list of all positions in which an 'O' can be placed
     if len(actions) == 0:       #if there are no possible actions then return emptry array
         return []
     probabilities = []
@@ -43,9 +37,10 @@ def get_probability( boardSize, configuration ):
         probabilities.append(0)         #initially assign a probability of zero to each cell
 
     for i in range(len(actions)):
-        probabilities[random.randint(0,len(actions)-1)] += 1        # to arbitrarily divide the probablity 1 among all the possibel actions, select randomly each action, the number of times an action is
-                                                                                                     # the corresponding probability with which that action will be choosed
-
+        #probabilities[random.randint(0,len(actions)-1)] += 1        # to arbitrarily divide the probablity 1 among all the possibel actions, select randomly each action, the number of times an action is
+        probabilities[i] = random.randint(100, 200)
+        #probabilities[i] = 1                                                                                           # the corresponding probability with which that action will be choosed
+    #probabilities[random.randint(0, len(actions)-1)] = 1
     listOfProb = [0 for i in range(boardSize*boardSize)]
     s = 0
     for i in range(len(actions)):
@@ -56,7 +51,7 @@ def get_probability( boardSize, configuration ):
     return listOfProb           #return the probabilites
 
 # Given a configuration this function returns the position in which the 'O' should be placed
-def getOpponentMove( configuration, boardSize ):
+def getOpponentMove( configuration, boardSize, opponentSide ):
     config = []
     for i in range(boardSize):
         k = []
@@ -68,7 +63,7 @@ def getOpponentMove( configuration, boardSize ):
         config.append(k)
     
     n = getIndex(boardSize, config)         #get the index of the configuration
-    opponentFilename = 'opponent'+str(boardSize)+'.txt'     #compute the file name in which the probabilites are placed
+    opponentFilename = 'opponent'+str(boardSize)+opponentSide+'.txt'     #compute the file name in which the probabilites are placed
     listOfProb = get_int_list(linecache.getline(opponentFilename, n+1))     #get the corresponding line and convert it into a list
 
     maximum = 0
@@ -84,21 +79,26 @@ def getOpponentMove( configuration, boardSize ):
     return []
 
 #This function creates an opponent if it is not present already
-def createOpponent( boardSize ):
+def createOpponent( boardSize, choice, opponentSide ):
     rows = 3**(boardSize*boardSize)
-    opponentFilename = 'opponent'+str(boardSize)+'.txt'
+    opponentFilename = 'opponent'+str(boardSize)+opponentSide+'.txt'
 
-    if os.path.exists(opponentFilename) == False:       #if the file doesn't exist then create a new opponent
+    n = rows
+    if os.path.exists(opponentFilename) == False: 
+        choice = True
+    if choice == True:
         file = open(opponentFilename, 'w')
-        r = rows//100
         print("Please wait while the opponent is being created")
         for i in range(rows):
-            if i % r == 0 and i != 0:
-                    print(str(i//r)+'% completed')
-            file.write(getString_from_intlist(get_probability( boardSize, getConfig(i, boardSize))))        #for each index, find the probabilites and push into the file
-        print('Created new opponent')   
+            file.write(getString_from_intlist(get_probability( boardSize, getConfig(i, boardSize), opponentSide)))        #for each index, find the probabilites and push into the file
+            if( i % 1000 == 0 ):
+                j = (i+1)/n
+                sys.stdout.write('\r')
+                sys.stdout.write("[%-20s] %d%%" % ('#'*int(20*j), 100*j))
+                sys.stdout.flush()
+        sys.stdout.write('\r')
+        sys.stdout.flush()
+        print("\033[94m" + 'Created new opponent for playing '+opponentSide+'               ' + "\033[0m" )   
     else:                       #if the file already exists return
-        print('Using existing opponent')
-
-    
+        print("\033[94m" + 'Using existing opponent for playing '+opponentSide + "\033[0m" )   
 
