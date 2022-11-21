@@ -156,10 +156,9 @@ def train_combined_encdec_predictor(mynn=None,X=None,y=None, epochs=11):
   # for each epoch, update weights
   
   optimizer = optim.SGD(mynn.parameters(), lr=0.01)
-  
+  y = nn.functional.one_hot(y, 10)
   for i in range(epochs):
     ypred, Xencdec = mynn(X)
-    y = nn.functional.one_hot(y, 10)
     lval = mynn.loss_fn(X,y,ypred,Xencdec)
 
     optimizer.zero_grad()
