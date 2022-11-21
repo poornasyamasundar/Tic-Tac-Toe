@@ -7,13 +7,71 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import roc_auc_score
+from sklearn.datasets import make_blobs,make_circles
+from sklearn.cluster import KMeans
+from sklearn.metrics import homogeneity_completeness_v_measure
 
+# You can import whatever standard packages are required
+
+# full sklearn, full pytorch, pandas, matplotlib, numpy are all available
+# Ideally you do not need to pip install any other packages!
+# Avoid pip install requirement on the evaluation program side, if you use above packages and sub-packages of them, then that is fine!
+
+###### PART 1 ######
+
+def get_data_blobs(n_points=100):
+  pass
+  # write your code here
+  # Refer to sklearn data sets
+  X, y = make_blobs(n_samples=n_points,random_state=0)
+  # write your code ...
+  return X,y
+
+def get_data_circles(n_points=100):
+  pass
+  # write your code here
+  # Refer to sklearn data sets
+  X,y = make_circles(n_samples=n_points, random_state=0, noise = 0.4)
+  # write your code ...
+  return X,y
+
+def get_data_mnist():
+  pass
+  # write your code here
+  # Refer to sklearn data sets
+  X,y = None
+  # write your code ...
+  return X,y
+
+def build_kmeans(X=None,k=10):
+  pass
+  # k is a variable, calling function can give a different number
+  # Refer to sklearn KMeans method
+  km = KMeans(n_clusters=k,max_iter=1000,algorithm='auto',random_state=0)
+  km.fit(X)
+  # write your code ...
+  return km
+
+def assign_kmeans(km=None,X=None):
+  pass
+  # For each of the points in X, assign one of the means
+  # refer to predict() function of the KMeans in sklearn
+  # write your code ...
+  ypred = km.predict(X)
+  return ypred
+
+def compare_clusterings(ypred_1=None,ypred_2=None):
+  pass
+  # refer to sklearn documentation for homogeneity, completeness and vscore
+  h,c,v = 0,0,0 # you need to write your code to find proper values
+  h,c,v = homogeneity_completeness_v_measure(ypred_1, ypred_2)
+  return h,c,v
 
 def build_lr_model(X=None, y=None):
   lr_model = None
   # write your code...
   # Build logistic regression, refer to sklearn
-  lr_model = LogisticRegression(random_state=0).fit(X,y)
+  lr_model = LogisticRegression(solver = 'liblinear',random_state=0).fit(X,y)
   return lr_model
 
 def build_rf_model(X=None, y=None):
@@ -24,12 +82,11 @@ def build_rf_model(X=None, y=None):
   # Build Random Forest classifier, refer to sklearn
   return rf_model
 
-def get_metrics(model1=None,X=None,y=None):
-  pass
+def get_metrics(model=None,X=None,y=None):
   # Obtain accuracy, precision, recall, f1score, auc score - refer to sklearn metrics
   acc, prec, rec, f1, auc = 0,0,0,0,0
   y_true = y
-  y_pred = model1.predict(X)
+  y_pred = model.predict(X)
   dummy = 0
   prec, rec, f1, dummy = precision_recall_fscore_support(y_true, y_pred, average='macro')
   acc = accuracy_score(y_true,y_pred)
@@ -52,12 +109,12 @@ def get_paramgrid_rf():
   # criterion: gini, entropy
   # maximum depth: 1, 10, None  
   rf_param_grid = None
-  rf_param_grd = {"n_estimators":[1,10,100], "criterion" : ["gini","entropy"], "max_depth":[1,10,None]}
+  rf_param_grid = {"n_estimators":[1,10,100], "criterion" : ["gini","entropy"], "max_depth":[1,10,None]}
   # refer to sklearn documentation on grid search and random forest classifier
   # write your code here...
   return rf_param_grid
 
-def perform_gridsearch_cv_multimetric(model1=None, param_grid=None, cv=5, X=None, y=None, metrics=['accuracy','roc_auc']):
+def perform_gridsearch_cv_multimetric(model=None, param_grid=None, cv=5, X=None, y=None, metrics=['accuracy','roc_auc']):
   
   # you need to invoke sklearn grid search cv function
   # refer to sklearn documentation
@@ -65,7 +122,19 @@ def perform_gridsearch_cv_multimetric(model1=None, param_grid=None, cv=5, X=None
   
   # metrics = [] the evaluation program can change what metrics to choose
   
+  top1_scores = []
+
   grid_search_cv = None
+  
+  grid_search_cv = GridSearchCV(model, param_grid, scoring = metrics[0])
+  grid_search_cv.fit(X,y)
+  
+  top1_scores.append(grid_search_cv.best_score_)
+
+  grid_search_cv = GridSearchCV(model, param_grid, scoring = metrics[1])
+  grid_search_cv.fit(X,y)
+  
+  top1_scores.append(grid_search_cv.best_score_)
   # create a grid search cv object
   # fit the object on X and y input above
   # write your code here...
@@ -74,8 +143,6 @@ def perform_gridsearch_cv_multimetric(model1=None, param_grid=None, cv=5, X=None
   
   # refer to cv_results_ dictonary
   # return top 1 score for each of the metrics given, in the order given in metrics=... list
-  
-  top1_scores = []
   
   return top1_scores
 
