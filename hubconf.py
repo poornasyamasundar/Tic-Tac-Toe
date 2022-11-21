@@ -2,6 +2,7 @@ from sklearn import datasets
 from torch import nn
 import torch.optim as optim
 import torch
+from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_recall_fscore_support
