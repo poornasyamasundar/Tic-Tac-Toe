@@ -40,7 +40,7 @@ def get_data_mnist():
   # write your code here
   # Refer to sklearn data sets
   digits = datasets.load_digits()
-  X = digits.images
+  X = digits.data
   y = digits.target
   # write your code ...
   return X,y
