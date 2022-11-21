@@ -29,7 +29,7 @@ def get_metrics(model1=None,X=None,y=None):
   # Obtain accuracy, precision, recall, f1score, auc score - refer to sklearn metrics
   acc, prec, rec, f1, auc = 0,0,0,0,0
   y_true = y
-  y_pred = model.predict(X)
+  y_pred = model1.predict(X)
   dummy = 0
   prec, rec, f1, dummy = precision_recall_fscore_support(y_true, y_pred, average='macro')
   acc = accuracy_score(y_true,y_pred)
