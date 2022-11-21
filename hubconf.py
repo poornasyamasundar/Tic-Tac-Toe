@@ -1,5 +1,6 @@
 from sklearn import datasets
-import torch.nn as nn
+from torch import nn
+import torch.optim as optim
 import torch
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
